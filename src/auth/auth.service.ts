@@ -8,8 +8,8 @@ import { SupabaseService } from '../common/services/supabase.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { CreateTenantDto } from './dto/create-tenant.dto';
-import { User } from './entities/user.entity';
-import { Tenant } from './entities/tenant.entity';
+import { User } from './domain/entities/user.entity';
+import { Tenant } from './domain/entities/tenant.entity';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
@@ -208,9 +208,13 @@ export class AuthService {
       passwordChangedAt: new Date(user.password_changed_at),
       lastSignInAt: user.last_sign_in_at
         ? new Date(user.last_sign_in_at)
-        : null,
+        : undefined,
       createdAt: new Date(user.created_at),
       updatedAt: new Date(user.updated_at),
+      getFullName: function () {
+        return `${this.firstName} ${this.lastName}`;
+      },
+      isActive: user.is_active ?? true,
     };
   }
 
@@ -224,6 +228,11 @@ export class AuthService {
       status: tenant.status,
       createdAt: new Date(tenant.created_at),
       updatedAt: new Date(tenant.updated_at),
+      isActive: tenant.is_active ?? true,
+      hasFeature: (feature: string) =>
+        Array.isArray(tenant.features)
+          ? tenant.features.includes(feature)
+          : false,
     };
   }
 }

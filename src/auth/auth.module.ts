@@ -16,12 +16,16 @@ import { NestJsJwtService } from './infrastructure/services/nestjs-jwt.service';
 import { IAuthRepository } from './domain/interfaces/auth-repository.interface';
 import { IPasswordService } from './domain/interfaces/password.interface';
 import { IJwtService } from './domain/interfaces/jwt.interface';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '24h' },
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '1d' },
+      }),
     }),
   ],
   controllers: [AuthController],

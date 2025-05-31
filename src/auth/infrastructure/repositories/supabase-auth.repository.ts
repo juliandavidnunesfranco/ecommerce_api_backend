@@ -36,7 +36,7 @@ export class SupabaseAuthRepository implements IAuthRepository {
       passwordChangedAt: new Date(user.password_changed_at),
       lastSignInAt: user.last_sign_in_at
         ? new Date(user.last_sign_in_at)
-        : null,
+        : undefined,
       createdAt: new Date(user.created_at),
       updatedAt: new Date(user.updated_at),
     };
@@ -68,10 +68,11 @@ export class SupabaseAuthRepository implements IAuthRepository {
       phoneNumber: user.phone_number,
       mfaEnabled: user.mfa_enabled,
       status: user.status,
+      hashedPassword: user.hashed_password,
       passwordChangedAt: new Date(user.password_changed_at),
       lastSignInAt: user.last_sign_in_at
         ? new Date(user.last_sign_in_at)
-        : null,
+        : undefined,
       createdAt: new Date(user.created_at),
       updatedAt: new Date(user.updated_at),
     };
@@ -106,16 +107,19 @@ export class SupabaseAuthRepository implements IAuthRepository {
       .eq('user_id', userId);
 
     return (
-      tenants?.map((t) => ({
-        id: t.tenants.id,
-        name: t.tenants.name,
-        slug: t.tenants.slug,
-        features: t.tenants.features,
-        settings: t.tenants.settings,
-        status: t.tenants.status,
-        createdAt: new Date(t.tenants.created_at),
-        updatedAt: new Date(t.tenants.updated_at),
-      })) || []
+      tenants?.map((t) => {
+        const tenant = Array.isArray(t.tenants) ? t.tenants[0] : t.tenants;
+        return {
+          id: tenant.id,
+          name: tenant.name,
+          slug: tenant.slug,
+          features: tenant.features,
+          settings: tenant.settings,
+          status: tenant.status,
+          createdAt: new Date(tenant.created_at),
+          updatedAt: new Date(tenant.updated_at),
+        };
+      }) || []
     );
   }
 
