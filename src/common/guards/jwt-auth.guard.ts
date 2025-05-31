@@ -7,12 +7,12 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { IJwtService } from '../../auth/domain/interfaces/jwt.interface';
+import { JWT_SERVICE_TOKEN } from '../constants';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
-    @Inject('IJwtService')
-    private readonly jwtService: IJwtService,
+    @Inject(JWT_SERVICE_TOKEN) private readonly jwtService: IJwtService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -25,7 +25,7 @@ export class JwtAuthGuard implements CanActivate {
 
     try {
       const payload = await this.jwtService.verifyToken(token);
-      request['user'] = payload;
+      request.user = payload;
       console.log('JWT validated for user:', payload.userId);
       return true;
     } catch (error) {

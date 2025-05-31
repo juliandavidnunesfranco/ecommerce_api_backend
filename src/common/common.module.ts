@@ -6,10 +6,11 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { TenantAccessGuard } from './guards/tenant-access.guard';
 import { AuthGuard } from './guards/auth.guard';
 import supabaseConfig from '../config/supabase.config';
+import { AuthModule } from '../auth/auth.module';
 
 @Global()
 @Module({
-  imports: [ConfigModule.forFeature(supabaseConfig)],
+  imports: [ConfigModule.forFeature(supabaseConfig), AuthModule],
   providers: [
     SupabaseService,
     TenantContextMiddleware,
