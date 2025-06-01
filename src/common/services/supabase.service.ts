@@ -19,10 +19,26 @@ export class SupabaseService {
     }
 
     // Cliente para operaciones normales
-    this.supabase = createClient(supabaseUrl, supabaseAnonKey);
+    this.supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+      },
+      db: {
+        schema: 'public',
+      },
+    });
 
     // Cliente admin para operaciones que requieren permisos elevados
-    this.adminSupabase = createClient(supabaseUrl, supabaseServiceKey);
+    this.adminSupabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+      },
+      db: {
+        schema: 'public',
+      },
+    });
   }
 
   getClient(): SupabaseClient {

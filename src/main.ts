@@ -27,10 +27,10 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle('API')
+    .setTitle('API Ecommerce Document')
     .setDescription('API description')
     .setVersion('1.0')
-    .addTag('auth', 'Operation for sistem authentication ')
+    .addTag('Auth', 'Operation for sistem authentication ')
     .addBearerAuth(
       {
         type: 'http',

@@ -9,19 +9,19 @@ import {
 import { Request } from 'express';
 import { IAuthRepository } from '../../auth/domain/interfaces/auth-repository.interface';
 import { IUser } from '../../auth/domain/interfaces/user.interface';
-
+import { AUTH_REPOSITORY_TOKEN } from '../constants';
 @Injectable()
 export class TenantAccessGuard implements CanActivate {
   private readonly logger = new Logger(TenantAccessGuard.name);
 
   constructor(
-    @Inject('IAuthRepository')
+    @Inject(AUTH_REPOSITORY_TOKEN)
     private readonly authRepository: IAuthRepository,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
-    const user = request['user'] as IUser;
+    const user = request.user as IUser;
     const tenantId = request.headers['x-tenant-id'] as string;
 
     if (!user || !tenantId) {
@@ -32,8 +32,10 @@ export class TenantAccessGuard implements CanActivate {
     }
 
     try {
+      // const userData = await this.authRepository.findUserById(user.id);
       const userTenants = await this.authRepository.getUserTenants(user.id);
       const hasAccess = userTenants.some((tenant) => tenant.id === tenantId);
+      //return userData && userData.tenantId === tenantId;
 
       if (!hasAccess) {
         this.logger.warn(

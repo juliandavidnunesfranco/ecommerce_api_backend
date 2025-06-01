@@ -2,6 +2,7 @@ import type { IUser } from './user.interface';
 import { ITenant } from './tenant.interface';
 
 export interface IAuthRepository {
+  findUserById(id: string): Promise<any>;
   findUserByEmail(email: string): Promise<IUser | null>;
   createUser(userData: CreateUserData): Promise<IUser>;
   updateLastSignIn(userId: string): Promise<void>;

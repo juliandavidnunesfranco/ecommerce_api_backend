@@ -17,6 +17,7 @@ import { AuthModule } from '../auth/auth.module';
     JwtAuthGuard,
     TenantAccessGuard,
     AuthGuard,
+    SupabaseService,
   ],
   exports: [
     SupabaseService,
@@ -24,6 +25,7 @@ import { AuthModule } from '../auth/auth.module';
     JwtAuthGuard,
     TenantAccessGuard,
     AuthGuard,
+    SupabaseService,
   ],
 })
 export class CommonModule {}

@@ -7,12 +7,17 @@ import { LoginUserUseCase } from './application/use-cases/login-user.use-case';
 import { CreateTenantUseCase } from './application/use-cases/create-tenant.use-case';
 
 // Infrastructure
-import { SupabaseAuthRepository } from './infrastructure/repositories/supabase-auth.repository';
+import {
+  AuthRepositoryProvider,
+  SupabaseAuthRepository,
+} from './infrastructure/repositories/supabase-auth.repository';
 import { BcryptPasswordService } from './infrastructure/services/bcrypt-password.service';
 import { NestJsJwtService } from './infrastructure/services/nestjs-jwt.service';
 
 import { JwtServiceProvider } from './infrastructure/services/nestjs-jwt.service';
 import { JWT_SERVICE_TOKEN } from '../common/constants';
+import { SupabaseService } from 'src/common/services/supabase.service';
+import { ConfigModule } from '@nestjs/config';
 
 // Interfaces
 //import { IAuthRepository } from './domain/interfaces/auth-repository.interface';
@@ -25,6 +30,7 @@ import { JWT_SERVICE_TOKEN } from '../common/constants';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '1h' },
     }),
+    ConfigModule,
   ],
   controllers: [AuthController],
   providers: [
@@ -33,6 +39,9 @@ import { JWT_SERVICE_TOKEN } from '../common/constants';
     LoginUserUseCase,
     CreateTenantUseCase,
     NestJsJwtService,
+    AuthRepositoryProvider,
+    SupabaseService,
+    SupabaseAuthRepository,
 
     // Infrastructure Services
     {
@@ -59,6 +68,9 @@ import { JWT_SERVICE_TOKEN } from '../common/constants';
     'IJwtService',
     JwtServiceProvider,
     JWT_SERVICE_TOKEN,
+    AuthRepositoryProvider,
+    SupabaseService,
+    SupabaseAuthRepository,
   ],
 })
 export class AuthModule {}

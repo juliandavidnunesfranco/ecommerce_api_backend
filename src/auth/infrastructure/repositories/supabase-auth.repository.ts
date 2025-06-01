@@ -7,10 +7,23 @@ import {
 } from '../../domain/interfaces/auth-repository.interface';
 import { IUser } from '../../domain/interfaces/user.interface';
 import { ITenant } from '../../domain/interfaces/tenant.interface';
+import { AUTH_REPOSITORY_TOKEN } from 'src/common/constants';
 
 @Injectable()
 export class SupabaseAuthRepository implements IAuthRepository {
   constructor(private readonly supabaseService: SupabaseService) {}
+
+  async findUserById(id: string): Promise<any> {
+    const { data, error } = await this.supabaseService
+      .getAdminClient()
+      .from('users')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  }
 
   async findUserByEmail(email: string): Promise<IUser | null> {
     const { data: user, error } = await this.supabaseService
@@ -195,3 +208,8 @@ export class SupabaseAuthRepository implements IAuthRepository {
     }
   }
 }
+
+export const AuthRepositoryProvider = {
+  provide: AUTH_REPOSITORY_TOKEN,
+  useClass: SupabaseAuthRepository,
+};
