@@ -1,0 +1,179 @@
+# Contexto del Proyecto: API Backend Multitenancy
+
+## 1. Visión General
+Sistema backend multitenancy diseñado para soportar múltiples tipos de servicios:
+- Marketplace
+- Sistema de Logística
+- Marketing Digital
+
+## 2. Estructura de Base de Datos
+
+### Schemas Principales:
+```sql
+- public        // Tablas compartidas
+- audit        // Registro de auditoría
+- tenant_template  // Plantilla base para tenants
+```
+
+### Tablas del Sistema:
+```sql
+public.tenants
+- Gestión de múltiples negocios/organizaciones
+- Configuraciones específicas por tipo de servicio
+- Control de features y settings
+
+public.users
+- Sistema unificado de usuarios
+- Soporte para MFA
+- Tracking de actividad
+
+public.tenant_users
+- Relación usuarios-tenants
+- Base para el multitenancy
+
+public.roles & public.permissions
+- Sistema RBAC flexible
+- Permisos granulares por servicio
+- Roles específicos por tenant
+```
+
+## 3. Características Multitenancy
+
+### Por Tenant:
+- Aislamiento completo de datos
+- Configuraciones específicas por servicio
+- Roles y permisos personalizados
+
+### Tipos de Servicios:
+
+#### Marketplace:
+- Gestión de productos
+- Procesamiento de órdenes
+- Sistema de vendedores
+
+#### Logística:
+- Tracking de envíos
+- Gestión de flotas
+- Optimización de rutas
+
+#### Marketing:
+- Campañas publicitarias
+- Analytics
+- Gestión de contenido
+
+## 4. Seguridad
+
+### Row Level Security (RLS):
+```sql
+- Políticas por tenant
+- Control granular de accesos
+- Aislamiento de datos
+```
+
+### Auditoría:
+```sql
+- Tracking completo de cambios
+- Registro de actividades
+- Cumplimiento normativo
+```
+
+## 5. Ejemplo de Uso con SupabaseService
+
+```typescript
+@Injectable()
+export class MarketplaceService {
+  constructor(private readonly supabaseService: SupabaseService) {}
+
+  async createStore(tenantId: string, storeData: CreateStoreDto) {
+    const client = this.supabaseService.getAdminClient();
+    
+    await this.supabaseService.setContext(storeData.ownerId, tenantId);
+
+    const { data, error } = await client
+      .from('stores')
+      .insert({
+        ...storeData,
+        tenant_id: tenantId,
+        service_type: 'marketplace'
+      })
+      .select()
+      .single();
+
+    if (error) throw new HttpException(
+      'Error creating store',
+      HttpStatus.BAD_REQUEST
+    );
+
+    return data;
+  }
+}
+```
+
+## 6. Configuración de Servicios
+
+### Marketplace:
+```typescript
+{
+  features: {
+    multiVendor: true,
+    digitalProducts: true,
+    subscriptions: true
+  }
+}
+```
+
+### Logística:
+```typescript
+{
+  features: {
+    realTimeTracking: true,
+    fleetManagement: true,
+    routeOptimization: true
+  }
+}
+```
+
+### Marketing:
+```typescript
+{
+  features: {
+    emailCampaigns: true,
+    analytics: true,
+    socialMedia: true
+  }
+}
+```
+
+## 7. Consideraciones de Escalabilidad
+
+### Base de Datos:
+- Particionamiento por tenant y tipo de servicio
+- Índices optimizados por caso de uso
+- Políticas de retención de datos
+
+### Performance:
+- Conexiones pooling optimizadas
+- Caché por tenant
+- Optimización de queries por servicio
+
+### Storage:
+- Políticas por tipo de servicio
+- Límites por tenant
+- CDN para assets
+
+## 8. Integración con Supabase
+
+### Realtime:
+- Canales específicos por servicio
+- Notificaciones en tiempo real
+- Estado de servicios
+
+### Storage:
+- Organización por tenant/servicio
+- Políticas de acceso granular
+- Optimización de assets
+
+### Edge Functions:
+- Procesamiento distribuido
+- Funciones específicas por servicio
+- Webhooks personalizados

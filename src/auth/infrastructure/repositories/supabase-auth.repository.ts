@@ -56,39 +56,50 @@ export class SupabaseAuthRepository implements IAuthRepository {
   }
 
   async createUser(userData: CreateUserData): Promise<IUser> {
-    const { data: user, error } = await this.supabaseService
-      .getAdminClient()
-      .from('users')
-      .insert({
-        email: userData.email,
-        hashed_password: userData.hashedPassword,
-        first_name: userData.firstName,
-        last_name: userData.lastName,
-        phone_number: userData.phoneNumber,
-      })
-      .select()
-      .single();
+    try {
+      const { data: user, error } = await this.supabaseService
+        .getAdminClient()
+        .from('users')
+        .insert({
+          email: userData.email,
+          hashed_password: userData.hashedPassword,
+          first_name: userData.firstName,
+          last_name: userData.lastName,
+          phone_number: userData.phoneNumber,
+          status: 'active',
+        })
+        .select()
+        .single();
 
-    if (error) {
-      throw new Error('Failed to create user');
+      if (error) {
+        console.error('Supabase insert error:', error);
+        throw new Error(`Failed to create user: ${error.message}`);
+      }
+
+      if (!user) {
+        throw new Error('User was not created');
+      }
+
+      return {
+        id: user.id,
+        email: user.email,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        phoneNumber: user.phone_number,
+        mfaEnabled: user.mfa_enabled,
+        status: user.status,
+        hashedPassword: user.hashed_password,
+        passwordChangedAt: new Date(user.password_changed_at),
+        lastSignInAt: user.last_sign_in_at
+          ? new Date(user.last_sign_in_at)
+          : undefined,
+        createdAt: new Date(user.created_at),
+        updatedAt: new Date(user.updated_at),
+      };
+    } catch (error: any) {
+      console.error('Supabase error details:', error);
+      throw new Error(`Failed to create user: ${error.message}`);
     }
-
-    return {
-      id: user.id,
-      email: user.email,
-      firstName: user.first_name,
-      lastName: user.last_name,
-      phoneNumber: user.phone_number,
-      mfaEnabled: user.mfa_enabled,
-      status: user.status,
-      hashedPassword: user.hashed_password,
-      passwordChangedAt: new Date(user.password_changed_at),
-      lastSignInAt: user.last_sign_in_at
-        ? new Date(user.last_sign_in_at)
-        : undefined,
-      createdAt: new Date(user.created_at),
-      updatedAt: new Date(user.updated_at),
-    };
   }
 
   async updateLastSignIn(userId: string): Promise<void> {

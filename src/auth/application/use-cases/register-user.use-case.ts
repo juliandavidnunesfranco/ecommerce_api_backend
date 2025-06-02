@@ -4,6 +4,7 @@ import { IPasswordService } from '../../domain/interfaces/password.interface';
 import { Email } from '../../domain/value-objects/email.vo';
 import { Password } from '../../domain/value-objects/password.vo';
 import { User } from '../../domain/entities/user.entity';
+import { RegisterDto } from 'src/auth/dto/register.dto';
 
 @Injectable()
 export class RegisterUserUseCase {
@@ -14,13 +15,9 @@ export class RegisterUserUseCase {
     private readonly passwordService: IPasswordService,
   ) {}
 
-  async execute(userData: {
-    email: string;
-    password: string;
-    firstName?: string;
-    lastName?: string;
-    phoneNumber?: string;
-  }): Promise<{ user: User; message: string }> {
+  async execute(
+    userData: RegisterDto,
+  ): Promise<{ user: User; message: string }> {
     // Validar datos de entrada
     const email = new Email(userData.email);
     const password = new Password(userData.password);

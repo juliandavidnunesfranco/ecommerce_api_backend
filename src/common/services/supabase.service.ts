@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
@@ -13,32 +13,73 @@ export class SupabaseService {
     const supabaseServiceKey = this.configService.get<string>(
       'supabase.serviceRoleKey',
     );
+    const supabaseOptions = this.configService.get('supabase.options');
 
     if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
-      throw new Error('Supabase configuration is missing');
+      console.error('Missing Supabase configuration:', {
+        url: supabaseUrl,
+        anonKey: !!supabaseAnonKey,
+        serviceKey: !!supabaseServiceKey,
+      });
+      throw new HttpException(
+        'Missing Supabase configuration',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
-    // Cliente para operaciones normales
-    this.supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-      },
-      db: {
-        schema: 'public',
-      },
-    });
+    console.log('Initializing Supabase with URL:', supabaseUrl);
 
-    // Cliente admin para operaciones que requieren permisos elevados
-    this.adminSupabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-      },
-      db: {
-        schema: 'public',
-      },
-    });
+    try {
+      // Cliente para operaciones normales
+      this.supabase = createClient(
+        supabaseUrl,
+        supabaseAnonKey,
+        supabaseOptions,
+      );
+
+      // Cliente admin para operaciones que requieren permisos elevados
+      this.adminSupabase = createClient(supabaseUrl, supabaseServiceKey, {
+        ...supabaseOptions,
+        db: {
+          schema: 'public',
+        },
+      });
+
+      // Verificar la conexión
+      void this.verifyConnection();
+    } catch (error) {
+      console.error('Error initializing Supabase client:', error);
+      throw new HttpException(
+        'Failed to initialize Supabase client',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  private async verifyConnection() {
+    try {
+      const { error } = await this.adminSupabase
+        .from('users')
+        .select('count')
+        .limit(1);
+      if (error) {
+        console.error('Error verifying Supabase connection:', error);
+        throw new HttpException(
+          'Failed to verify Supabase connection',
+          HttpStatus.BAD_REQUEST,
+          { cause: error },
+        );
+      } else {
+        console.log('Supabase connection verified successfully');
+      }
+    } catch (error) {
+      console.error('Failed to verify Supabase connection:', error);
+      throw new HttpException(
+        'Failed to connect to Supabase client',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        { cause: error },
+      );
+    }
   }
 
   getClient(): SupabaseClient {
@@ -67,6 +108,11 @@ export class SupabaseService {
       }
     } catch (error) {
       console.error('Error setting Supabase context:', error);
+      throw new HttpException(
+        'Failed to set Supabase context',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        { cause: error },
+      );
     }
   }
 }

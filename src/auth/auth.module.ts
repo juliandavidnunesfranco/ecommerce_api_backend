@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 // Use Cases
 import { RegisterUserUseCase } from './application/use-cases/register-user.use-case';
 import { LoginUserUseCase } from './application/use-cases/login-user.use-case';
@@ -17,7 +18,6 @@ import { NestJsJwtService } from './infrastructure/services/nestjs-jwt.service';
 import { JwtServiceProvider } from './infrastructure/services/nestjs-jwt.service';
 import { JWT_SERVICE_TOKEN } from '../common/constants';
 import { SupabaseService } from 'src/common/services/supabase.service';
-import { ConfigModule } from '@nestjs/config';
 
 // Interfaces
 //import { IAuthRepository } from './domain/interfaces/auth-repository.interface';
@@ -26,9 +26,17 @@ import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1h' },
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => {
+        const secret = configService.get<string>('JWT_SECRET');
+        console.log('JWT Secret configured:', !!secret);
+        return {
+          secret,
+          signOptions: { expiresIn: '1h' },
+        };
+      },
+      inject: [ConfigService],
     }),
     ConfigModule,
   ],
