@@ -15,6 +15,8 @@ import { CreateTenantDto } from './dto/create-tenant.dto';
 import { Public } from '../common/decorators/public.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { Throttle } from '@nestjs/throttler';
+//import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
@@ -25,12 +27,15 @@ export class AuthController {
   ) {}
 
   @Public()
+  //@SkipThrottle() para usar en websockets y realtime .
+  @Throttle({ default: { ttl: 60000, limit: 10 } }) // 10 peticiones por minuto
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
     return await this.registerUserUseCase.execute(registerDto);
   }
 
   @Public()
+  @Throttle({ default: { ttl: 60000, limit: 10 } }) // 10 peticiones por minuto
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto) {

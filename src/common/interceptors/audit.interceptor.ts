@@ -42,7 +42,8 @@ export class AuditInterceptor implements NestInterceptor {
         };
 
         const client = this.supabaseService.getAdminClient();
-        const schema = this.configService.get<string>('audit.schema');
+        const schema =
+          this.configService.get<string>('audit.schema') ?? 'public';
 
         await client
           .schema(schema)

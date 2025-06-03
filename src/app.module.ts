@@ -8,12 +8,12 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { CommonModule } from './common/common.module';
 import { TenantModule } from './tenant/tenant.module';
-import { UserModule } from './user/user.module';
+//import { UserModule } from './user/user.module';
 
 // Módulos de servicios específicos
-import { MarketplaceModule } from './services/marketplace/marketplace.module';
-import { LogisticsModule } from './services/logistics/logistics.module';
-import { MarketingModule } from './services/marketing/marketing.module';
+//import { MarketplaceModule } from './services/marketplace/marketplace.module';
+//import { LogisticsModule } from './services/logistics/logistics.module';
+//import { MarketingModule } from './services/marketing/marketing.module';
 
 // Middleware, Guards, Interceptors y Filters
 import { TenantContextMiddleware } from './common/middleware/tenant-context.middleware';
@@ -26,13 +26,14 @@ import { RateLimitGuard } from './common/guards/rate-limit.guard';
 // Configuración
 import configuration from './config/configuration';
 import { validateConfig } from './config/validation';
+import supabaseConfig from './config/supabase.config';
 
 @Module({
   imports: [
     // Configuración Global
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [configuration],
+      load: [configuration, supabaseConfig],
       validate: validateConfig,
       envFilePath: ['.env'],
     }),
@@ -42,8 +43,12 @@ import { validateConfig } from './config/validation';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        ttl: config.get('THROTTLE_TTL'),
-        limit: config.get('THROTTLE_LIMIT'),
+        throttlers: [
+          {
+            ttl: config.get('THROTTLE_TTL') || 60,
+            limit: config.get('THROTTLE_LIMIT') || 100,
+          },
+        ],
       }),
     }),
 
@@ -54,12 +59,12 @@ import { validateConfig } from './config/validation';
     CommonModule,
     AuthModule,
     TenantModule,
-    UserModule,
+    // UserModule,
 
     // Módulos de Servicios
-    MarketplaceModule,
-    LogisticsModule,
-    MarketingModule,
+    // MarketplaceModule,
+    // LogisticsModule,
+    // MarketingModule,
   ],
   providers: [
     // Guards Globales

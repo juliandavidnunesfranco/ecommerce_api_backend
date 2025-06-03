@@ -80,9 +80,19 @@ export class LoginUserUseCase {
 
     // Generar token JWT
     const token = await this.jwtService.generateToken({
-      userId: user.id,
+      sub: user.id,
       email: user.email.toString(),
-      tenants: tenants.map((t) => ({ id: t.id, slug: t.slug })),
+      tenantId: tenants[0]?.id || '',
+      roles: [],
+      permissions: [],
+      serviceType: 'marketplace',
+      status: user.status as 'active' | 'inactive' | 'suspended',
+      mfa_enabled: user.mfaEnabled,
+      tenant_status: (tenants[0]?.status || 'inactive') as
+        | 'active'
+        | 'inactive'
+        | 'suspended',
+      features: tenants[0]?.features || {},
     });
 
     return { user, tenants, token };

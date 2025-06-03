@@ -1,17 +1,17 @@
 export default () => ({
-  port: parseInt(process.env.PORT, 10) || 3000,
-  database: {
+  port: parseInt(process.env.PORT ?? '3000', 10),
+  /* database: {
     url: process.env.SUPABASE_URL,
-    key: process.env.SUPABASE_KEY,
+    key: process.env.SUPABASE_SERVICE_ROLE_KEY,
     anonKey: process.env.SUPABASE_ANON_KEY,
-  },
+  }, */
   jwt: {
     secret: process.env.JWT_SECRET,
     expiresIn: process.env.JWT_EXPIRES_IN || '1d',
   },
   throttle: {
-    ttl: parseInt(process.env.THROTTLE_TTL, 10) || 60,
-    limit: parseInt(process.env.THROTTLE_LIMIT, 10) || 10,
+    ttl: parseInt(process.env.THROTTLE_TTL ?? '60', 10),
+    limit: parseInt(process.env.THROTTLE_LIMIT ?? '1000', 10),
   },
   audit: {
     enabled: process.env.AUDIT_ENABLED === 'true',

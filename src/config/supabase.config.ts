@@ -1,10 +1,10 @@
 import { registerAs } from '@nestjs/config';
 
-export default registerAs('supabase', () => {
+const supabaseConfig = registerAs('supabase', () => {
   return {
     url: 'http://127.0.0.1:8000', // Puerto por defecto del API REST de Supabase
-    anonKey: process.env.SUPABASE_ANON_KEY,
-    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    anonKey: process.env.SUPABASE_ANON_KEY || '',
+    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
     options: {
       auth: {
         autoRefreshToken: true,
@@ -26,7 +26,7 @@ export default registerAs('supabase', () => {
       },
       global: {
         headers: {
-          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
         },
         fetch: globalThis.fetch,
         fetchOptions: {
@@ -65,3 +65,4 @@ export default registerAs('supabase', () => {
     },
   };
 });
+export default supabaseConfig;

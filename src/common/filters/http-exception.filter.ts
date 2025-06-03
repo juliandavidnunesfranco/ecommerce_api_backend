@@ -7,6 +7,14 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
+// Extend Express Request interface to include 'tenant' and 'user'
+declare module 'express' {
+  interface Request {
+    tenant?: { id?: string };
+    user?: { id?: string };
+  }
+}
+
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {

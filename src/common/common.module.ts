@@ -5,6 +5,7 @@ import { TenantContextMiddleware } from './middleware/tenant-context.middleware'
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { TenantAccessGuard } from './guards/tenant-access.guard';
 import { AuthGuard } from './guards/auth.guard';
+import { RateLimitGuard } from './guards/rate-limit.guard';
 import supabaseConfig from '../config/supabase.config';
 import { AuthModule } from '../auth/auth.module';
 
@@ -17,6 +18,7 @@ import { AuthModule } from '../auth/auth.module';
     JwtAuthGuard,
     TenantAccessGuard,
     AuthGuard,
+    RateLimitGuard,
     SupabaseService,
   ],
   exports: [
@@ -25,6 +27,7 @@ import { AuthModule } from '../auth/auth.module';
     JwtAuthGuard,
     TenantAccessGuard,
     AuthGuard,
+    RateLimitGuard,
     SupabaseService,
   ],
 })

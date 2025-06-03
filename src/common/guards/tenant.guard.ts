@@ -6,16 +6,26 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SupabaseService } from '../services/supabase.service';
+import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class TenantGuard implements CanActivate {
+  private readonly publicPaths = ['/auth/register', '/auth/login', '/health'];
+
   constructor(
     private readonly supabaseService: SupabaseService,
     private readonly configService: ConfigService,
+    private readonly reflector: Reflector,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
+
+    // Verificar si la ruta es pública
+    if (this.publicPaths.includes(request.path)) {
+      return true;
+    }
+    // Verificar si el header x-tenant-id es valido.
     const tenantId = request.headers['x-tenant-id'];
 
     if (!tenantId) {
